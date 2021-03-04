@@ -27,6 +27,7 @@ describe('RPC Connector', () => {
     return server.close()
   })
 
+  // TODO Errors should be rpc errors, thrown by the client
   // HealthCheck endpoint?
   // it('correctly spins up', () => {
   // });
@@ -52,7 +53,7 @@ describe('RPC Connector', () => {
       ))
 
     const response = await interaction.createCredentialOfferResponseToken([{
-      type: "ProofOfOrganizerRoleCredential",
+      type: "ProofOfEventOrganizerCredential",
     }])
 
     const {

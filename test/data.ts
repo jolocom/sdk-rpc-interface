@@ -1,7 +1,7 @@
 export const initiateCredentialOfferRPCMessage = {
-    "callbackURL": "https://condidi.com/interact", // This endpoint to which the Wallet will send the response
+    "callbackURL": "https://condidi.com/interact",
     "offeredCredentials": [{
-      "type": "ProofOfOrganizerRoleCredential",
+      "type": "ProofOfEventOrganizerCredential", // Defined in config.ts
       "claimData": {
           "name": "Joe",
           "surname": "Tester",
@@ -13,7 +13,7 @@ export const initiateCredentialOfferRPCMessage = {
 export const initiateCredentialRequestRPCMessage = {
     "callbackURL": "https://condidi.com/interact", // This endpoint to which the Wallet will send the response
     "credentialRequirements": [{
-      "type": ["Credential", "ProofOfOrganizerRoleCredential"], // The type and structure for the credentials relevant to the use case need to be defined
+      "type": ["VerifiableCredential", "ProofOfEventOrganizerCredential"], // Defined in config.ts
       constraints: [{
           "==": [{ "var": "issuer" }, "did:jolo:abc...fff"]
       }]

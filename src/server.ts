@@ -7,6 +7,7 @@ import {
   CredentialRequestFlowState,
 } from '@jolocom/sdk/js/interactionManager/types';
 import { ISignedCredentialAttrs } from 'jolocom-lib/js/credentials/signedCredential/types';
+import { issueCredentialsBasedOnOfferState } from './utils';
 
 type CredentialIssuanceAttrs = {
   callbackURL: string;
@@ -44,40 +45,18 @@ const getRequestHandlers = (agent: Agent): { [k: string]: Function } => ({
     }
 
     switch (interaction.flow.type) {
+
       case FlowType.CredentialOffer:
         const { state } = interaction.getSummary();
-        const {
-          selection,
-          offerSummary: offers,
-        } = state as CredentialOfferFlowState;
-        const creds = await Promise.all(
-          selection.map(selected => {
-            const originalOffer = offers.find(
-              offer => offer.type === selected.type
-            );
 
-            if (!originalOffer) {
-              throw new Error('');
-            }
+        const issuedCredentials = await issueCredentialsBasedOnOfferState(
+          state as CredentialOfferFlowState,
+          agent,
+          interaction.counterparty?.did as string
+        )
 
-            //@ts-ignore Hacky
-            const { claimData } = originalOffer;
-
-            return agent.signedCredential({
-              metadata: {
-                type: ['Verifiable Credential', selected.type],
-                context: [],
-                name: 'TODO',
-              },
-              claim: claimData || {},
-              //@ts-ignore
-              subject: interaction.counterparty?.did,
-            });
-          })
-        );
-
-        const credentialReceive = await interaction.createCredentialReceiveToken(
-          creds
+        const issuanceToken = await interaction.createCredentialReceiveToken(
+          issuedCredentials
         );
 
         return {
@@ -85,11 +64,11 @@ const getRequestHandlers = (agent: Agent): { [k: string]: Function } => ({
           interactionInfo: {
             type: 'credentialOffer',
             completed: true,
-            interactionToken: credentialReceive.encode(),
+            interactionToken: issuanceToken.encode(),
             state: {
               issuer: agent.idw.did,
               subject: interaction.counterparty?.did,
-              issued: creds.map(c => c.toJSON()),
+              issued: issuedCredentials.map(c => c.toJSON()),
             },
           },
         };
