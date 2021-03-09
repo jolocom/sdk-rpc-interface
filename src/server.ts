@@ -9,11 +9,20 @@ import { ISignedCredentialAttrs } from 'jolocom-lib/js/credentials/signedCredent
 import { issueFromStateAndClaimData } from './utils';
 import { InitiateCredentialRequestOptions, InitiateOfferOptions, RPCMethods } from './types';
 
+/**
+ * A JSON RPC method maps to one of these handlers (by name). Support for additional RPC methods
+ * can be added by extending this object.
+ */
+
 const getRequestHandlers = (
   agent: Agent,
   claimDataMap: {[k: string]: any} = {}
 ): { [k in RPCMethods]: Function } => ({
   initiateCredentialRequest: async (args: InitiateCredentialRequestOptions) => {
+    if (!args.callbackURL || !args.credentialRequirements.length) {
+      throw new Error('Invalid params')
+    }
+
     const token = await agent.credRequestToken(args);
     const { id } = await agent.findInteraction(token);
 
@@ -23,8 +32,11 @@ const getRequestHandlers = (
     };
   },
   initiateCredentialOffer: async (args: InitiateOfferOptions) => {
-    const token = await agent.credOfferToken(args);
+    if (!args.callbackURL || !args.offeredCredentials.length || !args.claimData.length) {
+      throw new Error('Invalid params')
+    }
 
+    const token = await agent.credOfferToken(args);
     const { id } = await agent.findInteraction(token);
 
     claimDataMap[id] = args.claimData
@@ -34,13 +46,20 @@ const getRequestHandlers = (
       interactionToken: token.encode(),
     };
   },
-
   processInteractionToken: async (args: { interactionToken: string }) => {
+    if (!args.interactionToken) {
+      throw new Error('Invalid params')
+    }
+
     const interaction = await agent.processJWT(args.interactionToken);
 
     if (!interaction) {
       throw new Error('Interaction not found');
     }
+
+    /**
+     * We might be processing a credential response, or a credential offer response.
+     */
 
     switch (interaction.flow.type) {
       case FlowType.CredentialOffer:
@@ -100,11 +119,20 @@ const getRequestHandlers = (
   },
 });
 
-export const createRPCServer = (agent: Agent) => {
+/**
+ * Starts a new WebSockets server at the specified port. The server exposes a JSON-RPC based
+ * interface for interacting with a Jolocom SDK / Agent instance.
+ * @param {Agent} agent - An instance of an Agent class (normally instantiated using the jolocom SDK). All requests
+ * sent to the SDK via the RPC channel are processed by this agent (i.e. it issues credentials, signs credential request tokens, etc.)
+ * @param {number} port - The port on which to expose the WS connection, defaults to 4040
+ * @returns {WebSocket.Server} - A configured, running WebSocket server instance
+ */
+
+export const createRPCServer = (agent: Agent, port: number = 4040): WebSocket.Server => {
   const requestHandlers = getRequestHandlers(agent);
 
   const wss = new Server({
-    port: 4040,
+    port,
   });
 
   wss.on('connection', (connection: WebSocket) => {
@@ -112,37 +140,50 @@ export const createRPCServer = (agent: Agent) => {
       const json = JSON.parse(message.toString());
       const request = rpc.parseObject(json);
 
-      if (request.type === rpc.RpcStatusType.request) {
-        const handler = requestHandlers[request.payload.method as RPCMethods];
+      if (request.type !== rpc.RpcStatusType.request) {
+        throw new Error(
+          `Server received RPC message of type "${request.type}", only "${rpc.RpcStatusType.request}" type currently supported`
+        )
+      }
 
-        if (!handler) {
-          const err = rpc.error(
-            request.payload.id,
-            new rpc.JsonRpcError(
-              `Method ${request.payload.method} not supported`,
-              0
-            )
-          );
+      const handler = requestHandlers[request.payload.method as RPCMethods];
 
-          return connection.send(err.serialize());
-        }
-
-        // TODO Proper error codes
-        return handler(request.payload.params as any)
-          .then((response: {}) =>
-            connection.send(
-              JSON.stringify(rpc.success(request.payload.id, response))
-            )
+      if (!handler) {
+        const err = rpc.error(
+          request.payload.id,
+          new rpc.JsonRpcError(
+            `Method "${request.payload.method}" not found`,
+            -32601
           )
-          .catch((err: Error) =>
-            JSON.stringify(
+        );
+
+        return connection.send(err.serialize());
+      }
+
+      return handler(request.payload.params as any)
+        .then((response: {}) =>
+          connection.send(
+            JSON.stringify(rpc.success(request.payload.id, response))
+          )
+        )
+        .catch((err: Error) => {
+          if (err.message === 'Invalid params') {
+            return connection.send(JSON.stringify(
               rpc.error(
                 request.payload.id,
-                new rpc.JsonRpcError(err.message, 0)
+                new rpc.JsonRpcError(err.message, -32602)
               )
+            ))
+          } else {
+            return connection.send(JSON.stringify(
+              rpc.error(
+                request.payload.id,
+                new rpc.JsonRpcError(err.message, -32000)
+              ))
             )
-          );
-      }
+          }
+        }
+        );
     });
   });
 
