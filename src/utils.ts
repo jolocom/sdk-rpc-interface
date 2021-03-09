@@ -1,43 +1,49 @@
-import { Agent } from "@jolocom/sdk";
-import { CredentialOfferFlowState } from "@jolocom/sdk/js/interactionManager/types";
-import { issuableCredentialTypes } from "./config";
+import { Agent } from '@jolocom/sdk';
+import { CredentialOfferFlowState } from '@jolocom/sdk/js/interactionManager/types';
+import { issuableCredentialTypes } from './config';
 
-export const issueCredentialsBasedOnOfferState = (
-    state: CredentialOfferFlowState,
-    issuingAgent: Agent,
-    subject: string
+export const issueFromStateAndClaimData = (
+  state: CredentialOfferFlowState,
+  claimData: {[k: string]: any},
+  issuingAgent: Agent,
+  subject: string
 ) => {
-    const { selection, offerSummary } = state
+  const { selection, offerSummary } = state;
 
-    return Promise.all(selection.map(({ type: selectedType }) => {
-        const selectedOffer = offerSummary.find(
-            offer => offer.type === selectedType
-        )
+  return Promise.all(
+    selection.map(({ type: selectedType }) => {
+      const selectedOffer = offerSummary.find(
+        offer => offer.type === selectedType
+      );
 
-        if (!selectedOffer) {
-            throw new Error('Could not find offer for selected type');
-        }
+      if (!selectedOffer) {
+        throw new Error('Could not find offer for selected type');
+      }
 
-        //@ts-ignore
-        const { claimData } = selectedOffer
+      const { claims } = claimData.find(({type} : {type: string}) =>
+        type === selectedType
+      )
 
-        const metadataForType = issuableCredentialTypes[selectedType]
 
-        if (!metadataForType) {
-          throw new Error(`No metadata found for issuing credential of type -- ${selectedType}`)
-        }
+      const metadataForType = issuableCredentialTypes[selectedType];
 
-        const { context, type, name } = metadataForType
+      if (!metadataForType) {
+        throw new Error(
+          `No metadata found for issuing credential of type -- ${selectedType}`
+        );
+      }
 
-        return issuingAgent.signedCredential({
-            metadata: {
-              type,
-              context,
-              name,
-            },
-            claim: claimData || {},
-            subject: subject,
-        });
+      const { context, type, name } = metadataForType;
 
-    }))
-}
+      return issuingAgent.signedCredential({
+        metadata: {
+          type,
+          context,
+          name,
+        },
+        claim: claims || {},
+        subject: subject,
+      });
+    })
+  );
+};

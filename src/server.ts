@@ -1,24 +1,19 @@
 import WebSocket, { Server } from 'ws';
 import * as rpc from 'jsonrpc-lite';
 import { Agent, FlowType } from '@jolocom/sdk';
-import { ICredentialRequestAttrs } from '@jolocom/protocol-ts';
 import {
   CredentialOfferFlowState,
   CredentialRequestFlowState,
 } from '@jolocom/sdk/js/interactionManager/types';
 import { ISignedCredentialAttrs } from 'jolocom-lib/js/credentials/signedCredential/types';
-import { issueCredentialsBasedOnOfferState } from './utils';
+import { issueFromStateAndClaimData } from './utils';
+import { InitiateCredentialRequestOptions, InitiateOfferOptions, RPCMethods } from './types';
 
-type CredentialIssuanceAttrs = {
-  callbackURL: string;
-  offeredCredentials: Array<{
-    type: string;
-    claimData: any;
-  }>;
-};
-
-const getRequestHandlers = (agent: Agent): { [k: string]: Function } => ({
-  initiateCredentialRequest: async (args: ICredentialRequestAttrs) => {
+const getRequestHandlers = (
+  agent: Agent,
+  claimDataMap: {[k: string]: any} = {}
+): { [k in RPCMethods]: Function } => ({
+  initiateCredentialRequest: async (args: InitiateCredentialRequestOptions) => {
     const token = await agent.credRequestToken(args);
     const { id } = await agent.findInteraction(token);
 
@@ -27,16 +22,19 @@ const getRequestHandlers = (agent: Agent): { [k: string]: Function } => ({
       interactionToken: token.encode(),
     };
   },
-  initiateCredentialOffer: async (args: CredentialIssuanceAttrs) => {
+  initiateCredentialOffer: async (args: InitiateOfferOptions) => {
     const token = await agent.credOfferToken(args);
 
     const { id } = await agent.findInteraction(token);
+
+    claimDataMap[id] = args.claimData
 
     return {
       interactionId: id,
       interactionToken: token.encode(),
     };
   },
+
   processInteractionToken: async (args: { interactionToken: string }) => {
     const interaction = await agent.processJWT(args.interactionToken);
 
@@ -45,15 +43,13 @@ const getRequestHandlers = (agent: Agent): { [k: string]: Function } => ({
     }
 
     switch (interaction.flow.type) {
-
       case FlowType.CredentialOffer:
-        const { state } = interaction.getSummary();
-
-        const issuedCredentials = await issueCredentialsBasedOnOfferState(
-          state as CredentialOfferFlowState,
+        const issuedCredentials = await issueFromStateAndClaimData(
+          interaction.getSummary().state as CredentialOfferFlowState,
+          claimDataMap[interaction.id],
           agent,
           interaction.counterparty?.did as string
-        )
+        );
 
         const issuanceToken = await interaction.createCredentialReceiveToken(
           issuedCredentials
@@ -117,7 +113,7 @@ export const createRPCServer = (agent: Agent) => {
       const request = rpc.parseObject(json);
 
       if (request.type === rpc.RpcStatusType.request) {
-        const handler = requestHandlers[request.payload.method];
+        const handler = requestHandlers[request.payload.method as RPCMethods];
 
         if (!handler) {
           const err = rpc.error(
@@ -131,12 +127,21 @@ export const createRPCServer = (agent: Agent) => {
           return connection.send(err.serialize());
         }
 
-        // Return error object in case of rejection
-        const response = await handler(request.payload.params);
-
-        return connection.send(
-          JSON.stringify(rpc.success(request.payload.id, response))
-        );
+        // TODO Proper error codes
+        return handler(request.payload.params as any)
+          .then((response: {}) =>
+            connection.send(
+              JSON.stringify(rpc.success(request.payload.id, response))
+            )
+          )
+          .catch((err: Error) =>
+            JSON.stringify(
+              rpc.error(
+                request.payload.id,
+                new rpc.JsonRpcError(err.message, 0)
+              )
+            )
+          );
       }
     });
   });

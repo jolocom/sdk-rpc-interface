@@ -1,19 +1,27 @@
-export const initiateCredentialOfferRPCMessage = {
+import { InitiateCredentialRequestOptions, InitiateOfferOptions } from "../src/types"
+
+/**
+ * Used in the test files to test the credential issuance flow
+ */
+export const initiateCredentialOfferRPCMessage: InitiateOfferOptions = {
     "callbackURL": "https://condidi.com/interact",
     "offeredCredentials": [{
-      "type": "ProofOfEventOrganizerCredential", // Defined in config.ts
-      "claimData": {
+      "type": "ProofOfEventOrganizerCredential", // Must be defined in config.ts
+    }],
+    claimData: [{
+        type: "ProofOfEventOrganizerCredential",
+        claims: {
           "name": "Joe",
           "surname": "Tester",
           "email": "joe@example.com"
-      }
+        }
     }]
 }
 
-export const initiateCredentialRequestRPCMessage = {
-    "callbackURL": "https://condidi.com/interact", // This endpoint to which the Wallet will send the response
+export const initiateCredentialRequestRPCMessage: InitiateCredentialRequestOptions = {
+    "callbackURL": "https://condidi.com/interact",
     "credentialRequirements": [{
-      "type": ["VerifiableCredential", "ProofOfEventOrganizerCredential"], // Defined in config.ts
+      "type": ["VerifiableCredential", "ProofOfEventOrganizerCredential"], // Must be defined in config.ts
       constraints: [{
           "==": [{ "var": "issuer" }, "did:jolo:abc...fff"]
       }]

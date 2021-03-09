@@ -2,7 +2,12 @@ import { randomBytes } from 'crypto';
 import { request } from 'jsonrpc-lite';
 import WebSocket from 'ws';
 import * as rpc from 'jsonrpc-lite';
-import { RPCMethods } from './types';
+import {
+  InitiateCredentialRequestOptions,
+  InitiateOfferOptions,
+  ProcessJWTOptions,
+  RPCMethods,
+} from './types';
 
 export class JolocomRPCClient {
   private wsClient: WebSocket;
@@ -47,7 +52,14 @@ export class JolocomRPCClient {
     return this.wsClient.readyState === WebSocket.OPEN;
   }
 
-  public async sendRequest(method: RPCMethods, args: any) {
+  // TODO Disjoint
+  public async sendRequest(
+    method: RPCMethods,
+    args:
+      | InitiateOfferOptions
+      | InitiateCredentialRequestOptions
+      | ProcessJWTOptions
+  ) {
     return new Promise<any>((resolve, reject) => {
       this.sendRequestWithCB(method, args, (error, result) => {
         if (error) {
@@ -60,7 +72,10 @@ export class JolocomRPCClient {
 
   private async sendRequestWithCB(
     method: RPCMethods,
-    args: any,
+    args:
+      | InitiateOfferOptions
+      | InitiateCredentialRequestOptions
+      | ProcessJWTOptions,
     callback: (error: Error, result: {}) => void
   ) {
     const requestID = randomBytes(8).toString('hex');

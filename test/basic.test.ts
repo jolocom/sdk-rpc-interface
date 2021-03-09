@@ -7,6 +7,15 @@ import { RPCMethods } from '../src/types'
 import { createAgent } from './helpers'
 import { SignedCredential } from 'jolocom-lib/js/credentials/signedCredential/signedCredential';
 import { Server } from 'ws';
+import { CredentialOfferFlowState } from '@jolocom/sdk/js/interactionManager/types';
+
+/**
+ * It should throw on incorrect method with friendly error
+ * It should throw on incorrect args with friendly error
+ * Internal SDK errors should be properly handled
+ * - ProcessInteractionToken should throw in case interaction is not found
+ * - Invalid credential response (signature, constraints)
+ */
 
 describe('RPC Connector', () => {
   const testSeed = Buffer.from('a'.repeat(32), 'hex')
@@ -34,8 +43,6 @@ describe('RPC Connector', () => {
 
   describe('sendRequest', () => {
     it('correctly fails if request method is not supported', async () => {
-      //@ts-ignore -- 'example' is not a valid rpc method
-     await expect(client.sendRequest('example')).rejects.toBeTruthy()
     })
   })
 
@@ -68,9 +75,14 @@ describe('RPC Connector', () => {
     expect(interactionInfo.interactionToken).toBeDefined()
     expect(interactionInfo.completed).toBeTruthy()
 
+    const { issued } = interactionInfo.state as CredentialOfferFlowState
     expect(interactionInfo.state.issuer).toBe(agent.idw.did)
     expect(interactionInfo.state.subject).toBe(agent.idw.did)
-    expect(interactionInfo.state.issued).toHaveLength(1)
+    expect(issued).toHaveLength(1)
+    expect(issued[0].claim).toStrictEqual({
+      id: agent.idw.did,
+      ...initiateCredentialOfferRPCMessage.claimData[0].claims
+    })
 
     issuedCred = SignedCredential.fromJSON(interactionInfo.state.issued[0])
     await agent.storage.store.verifiableCredential(issuedCred)
@@ -100,5 +112,22 @@ describe('RPC Connector', () => {
     expect(interactionInfo.state.subject).toBe(agent.idw.did)
     expect(interactionInfo.state.credentials).toHaveLength(1)
     expect(interactionInfo.state.credentials).toStrictEqual([issuedCred.toJSON()])
+  })
+
+  describe('errors', () => {
+    it('throws in case RPC method is not supported', async () => {
+      await expect(client.sendRequest(
+        //@ts-ignore -- 'example' is not a valid rpc method
+        'example',
+        initiateCredentialOfferRPCMessage
+      )).rejects.toBeTruthy()
+    })
+
+    it('throws in case initiateCredentialRequest request is mallformed', async () => {
+      // await expect(client.sendRequest(
+      //   RPCMethods.initiateCredentialRequest,
+      //   initiateCredentialRequestRPCMessage
+      // )).rejects.toBeTruthy()
+    })
   })
 });
