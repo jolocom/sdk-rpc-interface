@@ -8,6 +8,7 @@ import {
 import { ISignedCredentialAttrs } from 'jolocom-lib/js/credentials/signedCredential/types';
 import { issueFromStateAndClaimData } from './utils';
 import { InitiateCredentialRequestOptions, InitiateOfferOptions, RPCMethods } from './types';
+import { serverConfig } from './config'
 
 /**
  * A JSON RPC method maps to one of these handlers (by name). Support for additional RPC methods
@@ -128,11 +129,12 @@ const getRequestHandlers = (
  * @returns {WebSocket.Server} - A configured, running WebSocket server instance
  */
 
-export const createRPCServer = (agent: Agent, port: number = 4040): WebSocket.Server => {
+export const createRPCServer = (agent: Agent): WebSocket.Server => {
   const requestHandlers = getRequestHandlers(agent);
 
   const wss = new Server({
-    port,
+    host: serverConfig.host,
+    port: serverConfig.port,
   });
 
   wss.on('connection', (connection: WebSocket) => {

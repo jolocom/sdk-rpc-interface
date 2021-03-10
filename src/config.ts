@@ -1,6 +1,6 @@
 import { BaseMetadata } from '@jolocom/protocol-ts';
 
-export const issuableCredentialTypes: {
+export const issuerConfig: {
   [k: string]: BaseMetadata;
 } = {
   ProofOfEventOrganizerCredential: {
@@ -49,3 +49,28 @@ export const issuableCredentialTypes: {
     ],
   },
 };
+
+export const serverConfig = {
+  // host/ip to listen on locally
+  host: process.env.LISTEN_HOST || 'localhost',
+
+  // port to listen on locally
+  port: parseInt(process.env.LISTEN_PORT || '4040'),
+
+  // Password for service agent (JolocomSDK Agent)
+  agentPassword: process.env.UBS_AGENT_PASSWORD || 'hunter2',
+
+  // Database configuration for service agent
+  ormconfig: {
+    type: 'sqlite',
+    database: __dirname + '/../db.sqlite3',
+    logging: ['error', 'warn', 'schema'],
+    entities: [...require('@jolocom/sdk-storage-typeorm').entityList],
+    migrations: [__dirname + '/migrations/*.ts'],
+    migrationsRun: true,
+    synchronize: true,
+    cli: {
+      migrationsDir: __dirname + '/migrations',
+    },
+  }
+}

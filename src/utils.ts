@@ -1,6 +1,6 @@
 import { Agent } from '@jolocom/sdk';
 import { CredentialOfferFlowState } from '@jolocom/sdk/js/interactionManager/types';
-import { issuableCredentialTypes } from './config';
+import { issuerConfig } from './config';
 
 export const issueFromStateAndClaimData = (
   state: CredentialOfferFlowState,
@@ -25,7 +25,7 @@ export const issueFromStateAndClaimData = (
       )
 
 
-      const metadataForType = issuableCredentialTypes[selectedType];
+      const metadataForType = issuerConfig[selectedType];
 
       if (!metadataForType) {
         throw new Error(

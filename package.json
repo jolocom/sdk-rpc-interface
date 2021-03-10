@@ -11,7 +11,7 @@
     "node": ">=10"
   },
   "scripts": {
-    "start": "tsdx watch",
+    "server": "node ./dist/index.js",
     "build": "tsdx build",
     "test": "tsdx test",
     "lint": "tsdx lint",

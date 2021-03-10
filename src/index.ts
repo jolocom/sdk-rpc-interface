@@ -1,2 +1,2 @@
-export { createRPCServer } from './server';
+export { init } from './run';
 export { JolocomRPCClient } from './client';
