@@ -1,0 +1,12 @@
+version: '2.1'
+
+services:
+  jolocom:
+    build: .
+    volumes:
+      - ./data:/data
+    ports:
+      - '4040:4040'
+    environment:
+      DATABASE_DIR: '/data'
+      AGENT_PASSWORD: 'hunter2'

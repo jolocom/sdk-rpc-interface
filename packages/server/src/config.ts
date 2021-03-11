@@ -58,12 +58,12 @@ export const serverConfig = {
   port: parseInt(process.env.LISTEN_PORT || '4040'),
 
   // Password for service agent (JolocomSDK Agent)
-  agentPassword: process.env.UBS_AGENT_PASSWORD || 'hunter2',
+  agentPassword: process.env.AGENT_PASSWORD || 'hunter2',
 
   // Database configuration for service agent
   ormconfig: {
     type: 'sqlite',
-    database: __dirname + '/../db.sqlite3',
+    database: (process.env.DATABASE_DIR || `${__dirname}/..`) + '/db.sqlite3',
     logging: ['error', 'warn', 'schema'],
     entities: [...require('@jolocom/sdk-storage-typeorm').entityList],
     migrations: [__dirname + '/migrations/*.ts'],
