@@ -1,0 +1,65 @@
+{
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why"
+  },
+  "peerDependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "name": "server",
+  "author": "Exulansis",
+  "module": "dist/server.esm.js",
+  "size-limit": [
+    {
+      "path": "dist/server.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/server.esm.js",
+      "limit": "10 KB"
+    }
+  ],
+  "dependencies": {
+    "@jolocom/sdk": "^1.0.1",
+    "@jolocom/sdk-storage-typeorm": "^4.1.0",
+    "jolocom-lib": "^5.2.0",
+    "jsonrpc-lite": "^2.2.0",
+    "sqlite3": "^5.0.2",
+    "typeorm": "^0.2.31",
+    "ws": "^7.4.4"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^4.10.1",
+    "@types/ws": "^7.4.0",
+    "husky": "^5.1.3",
+    "size-limit": "^4.10.1",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.1.0",
+    "typescript": "^4.2.3"
+  }
+}

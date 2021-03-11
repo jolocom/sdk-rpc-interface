@@ -1,7 +1,7 @@
 import { initiateCredentialOfferRPCMessage, initiateCredentialRequestRPCMessage } from './data'
 import { Agent } from '@jolocom/sdk/js/agent';
 import { JolocomLib } from 'jolocom-lib';
-import { JolocomRPCClient } from '../src/client'
+import { JolocomRPCClient } from '../../client/src/index'
 import { createRPCServer } from '../src/server'
 import { RPCMethods } from '../src/types'
 import { createAgent } from './helpers'
@@ -26,11 +26,6 @@ describe('RPC Connector', () => {
 
   afterAll(async () => {
     return server.close()
-  })
-
-  describe('sendRequest', () => {
-    it('correctly fails if request method is not supported', async () => {
-    })
   })
 
   it('correctly issues credential offer tokens', async () => {
@@ -91,6 +86,7 @@ describe('RPC Connector', () => {
       interactionToken: resp.encode()
     })
 
+    console.log(interactionInfo)
     expect(interactionId).toStrictEqual(interaction.id)
     expect(interactionInfo.type).toBe('credentialRequest')
     expect(interactionInfo).toBeDefined()
