@@ -86,7 +86,6 @@ describe('RPC Connector', () => {
       interactionToken: resp.encode()
     })
 
-    console.log(interactionInfo)
     expect(interactionId).toStrictEqual(interaction.id)
     expect(interactionInfo.type).toBe('credentialRequest')
     expect(interactionInfo).toBeDefined()
