@@ -31,7 +31,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "client",
+  "name": "@jolocom/sdk-rpc-client",
   "author": "Exulansis",
   "module": "dist/client.esm.js",
   "size-limit": [
@@ -46,6 +46,7 @@
   ],
   "devDependencies": {
     "@size-limit/preset-small-lib": "^4.10.1",
+    "@types/qrcode": "^1.4.0",
     "@types/ws": "^7.4.0",
     "husky": "^5.1.3",
     "size-limit": "^4.10.1",
@@ -55,6 +56,7 @@
   },
   "dependencies": {
     "jsonrpc-lite": "^2.2.0",
+    "qrcode": "^1.4.4",
     "ws": "^7.4.4"
   }
 }

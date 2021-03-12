@@ -7,6 +7,7 @@ import {
   ProcessJWTOptions,
   RPCMethods,
 } from './types';
+import { encodeAsDeepLink, encodeAsQrCode } from './utils'
 
 /**
  * Lightweight WS / JSON-RPC client for interacting with a
@@ -125,4 +126,13 @@ export class JolocomRPCClient {
   private async sendJSON(message: {}) {
     this.wsClient.send(JSON.stringify(message));
   }
+}
+
+/**
+ * Helper functions to aid encoding interaction tokens as deep links or QR codes.
+ */
+
+export const utils = {
+  encodeAsDeepLink,
+  encodeAsQrCode
 }
