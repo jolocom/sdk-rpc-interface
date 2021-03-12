@@ -9,7 +9,7 @@ export const issuerConfig: {
     context: [
       {
         ProofOfEventOrganizerCredential:
-          'http://terms.condidi.com/ProofOfEventOrganizerCredential',
+          'http://terms.example.com/ProofOfEventOrganizerCredential',
         schema: 'http://schema.org/',
         email: 'schema:email',
         name: 'schema:name',
@@ -22,7 +22,7 @@ export const issuerConfig: {
     context: [
       {
         EventInvitationCredential:
-          'http://terms.condidi.com/EventInvitationCredential',
+          'http://terms.example.com/EventInvitationCredential',
         schema: 'http://schema.org/',
         presenter: 'schema:performer',
         name: 'schema:name',

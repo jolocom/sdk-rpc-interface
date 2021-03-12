@@ -4,7 +4,7 @@ import { InitiateCredentialRequestOptions, InitiateOfferOptions } from "../src/t
  * Used in the test files to test the credential issuance flow
  */
 export const initiateCredentialOfferRPCMessage: InitiateOfferOptions = {
-    "callbackURL": "https://condidi.com/interact",
+    "callbackURL": "https://example.com/interact",
     "offeredCredentials": [{
       "type": "ProofOfEventOrganizerCredential", // Must be defined in config.ts
     }],
@@ -19,7 +19,7 @@ export const initiateCredentialOfferRPCMessage: InitiateOfferOptions = {
 }
 
 export const initiateCredentialRequestRPCMessage: InitiateCredentialRequestOptions = {
-    "callbackURL": "https://condidi.com/interact",
+    "callbackURL": "https://example.com/interact",
     "credentialRequirements": [{
       "type": ["VerifiableCredential", "ProofOfEventOrganizerCredential"], // Must be defined in config.ts
       constraints: [{
