@@ -52,7 +52,7 @@ export const issuerConfig: {
 
 export const serverConfig = {
   // host/ip to listen on locally
-  host: process.env.LISTEN_HOST || 'localhost',
+  host: process.env.LISTEN_HOST || '0.0.0.0',
 
   // port to listen on locally
   port: parseInt(process.env.LISTEN_PORT || '4040'),
