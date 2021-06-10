@@ -1,6 +1,7 @@
 import WebSocket, { Server } from 'ws';
+import { claimsMetadata } from '@jolocom/protocol-ts'
 import * as rpc from 'jsonrpc-lite';
-import { Agent, FlowType } from '@jolocom/sdk';
+import { Agent, FlowType, JolocomLib } from '@jolocom/sdk';
 import {
   CredentialOfferFlowState,
   CredentialRequestFlowState,
@@ -19,6 +20,38 @@ const getRequestHandlers = (
   agent: Agent,
   claimDataMap: {[k: string]: any} = {}
 ): { [k in RPCMethods]: Function } => ({
+  updatePublicProfile: async (args: typeof claimsMetadata.publicProfile.claimInterface) => {
+    const newPublicProfile = await agent.signedCredential({
+      metadata: claimsMetadata.publicProfile,
+      claim: args,
+      subject: agent.idw.did
+    })
+
+    const addr = await agent.keyProvider.getPubKeyByController(
+      await agent.passwordStore.getPassword(),
+      `${agent.idw.did}#keys-2`
+    )
+
+    await JolocomLib.util.fuelKeyWithEther(Buffer.from(addr.publicKeyHex, 'hex'))
+    console.log('address fueled')
+
+    return agent.didMethod.registrar.updatePublicProfile(
+        agent.keyProvider, 
+        await agent.passwordStore.getPassword(), 
+        agent.idw.identity, 
+        newPublicProfile
+      ).then(() => {
+        console.log('profile updated')
+        return {
+          success: true
+        }
+      }).catch(e => {
+        return {
+          success: false,
+          error: e
+        }
+      })
+  },
   initiateCredentialRequest: async (args: InitiateCredentialRequestOptions) => {
     if (!args.callbackURL || !args.credentialRequirements.length) {
       throw new Error('Invalid params')
@@ -187,10 +220,11 @@ export const createRPCServer = (agent: Agent): WebSocket.Server => {
       }
 
       return handler(request.payload.params as any)
-        .then((response: {}) =>
-          connection.send(
+        .then((response: {}) => {
+          return connection.send(
             JSON.stringify(rpc.success(request.payload.id, response))
           )
+        }
         )
         .catch((err: Error) => {
           if (err.message === 'Invalid params') {

@@ -7,6 +7,7 @@ import {
   InitiateOfferOptions,
   ProcessJWTOptions,
   RPCMethods,
+  UpdatePubProfileRequestOptions
 } from './types';
 import { encodeAsDeepLink, encodeAsQrCode } from './utils'
 
@@ -45,13 +46,11 @@ export class JolocomRPCClient {
       }
 
       if (response.type === rpc.RpcStatusType.success) {
-        if (response.type === rpc.RpcStatusType.success) {
-          if (response.payload.id) {
-            this.pendingRequests[response.payload.id](
-              null,
-              response.payload.result
-            );
-          }
+        if (response.payload.id) {
+          this.pendingRequests[response.payload.id](
+            null,
+            response.payload.result
+          );
         }
       }
     });
@@ -84,12 +83,14 @@ export class JolocomRPCClient {
       | InitiateAuthnRequestOptions
       | InitiateCredentialRequestOptions
       | ProcessJWTOptions
+      | UpdatePubProfileRequestOptions
   ) {
     return new Promise<any>((resolve, reject) => {
       this.sendRequestWithCB(method, args, (error, result) => {
         if (error) {
           return reject(error);
         }
+
         return resolve(result as rpc.SuccessObject);
       });
     });
@@ -105,7 +106,8 @@ export class JolocomRPCClient {
       | InitiateOfferOptions
       | InitiateAuthnRequestOptions
       | InitiateCredentialRequestOptions
-      | ProcessJWTOptions,
+      | ProcessJWTOptions
+      | UpdatePubProfileRequestOptions,
     callback: (error: Error, result: {}) => void
   ) {
     const requestID = randomBytes(8).toString('hex');
@@ -139,3 +141,10 @@ export const utils = {
   encodeAsDeepLink,
   encodeAsQrCode
 }
+
+const client = new JolocomRPCClient('ws://localhost:4040')
+
+client.sendRequest(RPCMethods.initiateAuthentication, {
+  description: 'hello',
+  callbackURL: 'google.com'
+}).then(console.log)

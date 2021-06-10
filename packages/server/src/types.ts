@@ -1,4 +1,5 @@
 import {
+  claimsMetadata,
   ICredentialRequestAttrs,
   CredentialOfferRequestAttrs,
   IAuthenticationAttrs
@@ -6,6 +7,7 @@ import {
 import { Defined } from 'jsonrpc-lite';
 
 export enum RPCMethods {
+  updatePublicProfile = 'updatePublicProfile',
   initiateCredentialOffer = 'initiateCredentialOffer',
   initiateCredentialRequest = 'initiateCredentialRequest',
   initiateAuthentication = 'initiateAuthentication',
@@ -27,3 +29,5 @@ export type InitiateAuthnRequestOptions = IAuthenticationAttrs
 export type ProcessJWTOptions = {
   interactionToken: string;
 };
+
+export type UpdatePubProfileRequestOptions = typeof claimsMetadata.publicProfile.claimInterface

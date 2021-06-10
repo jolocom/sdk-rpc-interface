@@ -142,7 +142,7 @@ const qrCode = utils.encodeAsQrCode(credentialRequest.interactionToken)
 const deepLink = utils.encodeAsDeepLink(credentialRequest.interactionToken)
 ```
 
-Once the Wallet has received the request (e.g. by scanning a QR code or by oppening a deep link), the user will be prompted to share matching Verifiable Credentials from their Wallet. The selected VCs will be POSTed to the endpoint listed in the `callbackURL` field.
+Once the Wallet has received the request (e.g. by scanning a QR code or by opening a deep link), the user will be prompted to share matching Verifiable Credentials from their Wallet. The selected VCs will be POSTed to the endpoint listed in the `callbackURL` field.
 
 In order to complete the interaction (i.e. verify the VCs presented by the user), the following method can be called:
 
@@ -179,6 +179,25 @@ The RPC server will process the user response. If the response is valid (e.g. co
 ```
 
 Unlike the Credential Issuance flow, no extra messages need to be communicated / shared with the Wallet.
+
+### Configuring the remote RPC server
+
+The [Public Profile](https://jolocom-lib.readthedocs.io/en/latest/publicProfile.html) associated with the SSI agent running behind the RPC server can be updated using the following RPC call:
+
+``` typescript
+{
+  const client = new JolocomRPCClient('ws://localhost:4040')
+
+  client.sendRequest(RPCMethods.updatePublicProfile, {
+    name: 'DemoIssuanceService',
+    description: 'We issue demo credentials to you!',
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Example_image.svg/600px-Example_image.svg.png',
+    url: 'https://demo-issuer.com'
+  })
+}
+```
+
+This call only needs to be made once. Subsequent calls can be made to overwrite / update the current profile. Because this operation involves broadcasting a transaction to the Ethereum network, as well as interacting with the IPFS network, it will take roughly one minute to complete.
 
 ### Additional resources
 
