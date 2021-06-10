@@ -141,5 +141,3 @@ export const utils = {
   encodeAsDeepLink,
   encodeAsQrCode
 }
-
-const client = new JolocomRPCClient('ws://localhost:4040')
