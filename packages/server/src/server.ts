@@ -7,7 +7,7 @@ import {
 } from '@jolocom/sdk/js/interactionManager/types';
 import { ISignedCredentialAttrs } from 'jolocom-lib/js/credentials/signedCredential/types';
 import { issueFromStateAndClaimData } from './utils';
-import { InitiateCredentialRequestOptions, InitiateOfferOptions, RPCMethods } from './types';
+import { InitiateAuthnRequestOptions, InitiateCredentialRequestOptions, InitiateOfferOptions, RPCMethods } from './types';
 import { serverConfig } from './config'
 
 /**
@@ -47,6 +47,19 @@ const getRequestHandlers = (
       interactionToken: token.encode(),
     };
   },
+  initiateAuthentication: async (args: InitiateAuthnRequestOptions) => {
+    if (!args.callbackURL || !args.description) {
+      throw new Error('Invalid params')
+    }
+
+    const token = await agent.authRequestToken(args);
+    const { id } = await agent.findInteraction(token);
+
+    return {
+      interactionId: id,
+      interactionToken: token.encode(),
+    }
+  },
   processInteractionToken: async (args: { interactionToken: string }) => {
     if (!args.interactionToken) {
       throw new Error('Invalid params')
@@ -59,10 +72,21 @@ const getRequestHandlers = (
     }
 
     /**
-     * We might be processing a credential response, or a credential offer response.
+     * We might be processing a credential response, a credential offer response, or an authn response
      */
 
     switch (interaction.flow.type) {
+      case FlowType.Authentication:
+        return {
+          interactionId: interaction.id,
+          interactionInfo: {
+            type: 'authentication',
+            completed: true,
+            state: {
+              subject: interaction.counterparty?.did,
+            },
+          },
+      }
       case FlowType.CredentialOffer:
         const issuedCredentials = await issueFromStateAndClaimData(
           interaction.getSummary().state as CredentialOfferFlowState,

@@ -2,6 +2,7 @@ import { randomBytes } from 'crypto';
 import WebSocket from 'ws';
 import * as rpc from 'jsonrpc-lite';
 import {
+  InitiateAuthnRequestOptions,
   InitiateCredentialRequestOptions,
   InitiateOfferOptions,
   ProcessJWTOptions,
@@ -80,6 +81,7 @@ export class JolocomRPCClient {
     method: RPCMethods,
     args:
       | InitiateOfferOptions
+      | InitiateAuthnRequestOptions
       | InitiateCredentialRequestOptions
       | ProcessJWTOptions
   ) {
@@ -101,6 +103,7 @@ export class JolocomRPCClient {
     method: RPCMethods,
     args:
       | InitiateOfferOptions
+      | InitiateAuthnRequestOptions
       | InitiateCredentialRequestOptions
       | ProcessJWTOptions,
     callback: (error: Error, result: {}) => void

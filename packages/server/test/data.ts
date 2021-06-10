@@ -1,4 +1,4 @@
-import { InitiateCredentialRequestOptions, InitiateOfferOptions } from "../src/types"
+import { InitiateAuthnRequestOptions, InitiateCredentialRequestOptions, InitiateOfferOptions } from "../src/types"
 
 /**
  * Used in the test files to test the credential issuance flow
@@ -26,4 +26,9 @@ export const initiateCredentialRequestRPCMessage: InitiateCredentialRequestOptio
           "==": [{ "var": "issuer" }, "did:jolo:abc...fff"]
       }]
     }]
+}
+
+export const initiateAuthnRPCMessage: InitiateAuthnRequestOptions = {
+  description: 'Please accept the invitation',
+  callbackURL: 'https://example.com/interactt'
 }

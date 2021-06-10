@@ -1,4 +1,4 @@
-import { initiateCredentialOfferRPCMessage, initiateCredentialRequestRPCMessage } from './data'
+import { initiateAuthnRPCMessage, initiateCredentialOfferRPCMessage, initiateCredentialRequestRPCMessage } from './data'
 import { Agent } from '@jolocom/sdk/js/agent';
 import { JolocomLib } from 'jolocom-lib';
 import { JolocomRPCClient } from '../../client/src/index'
@@ -94,6 +94,29 @@ describe('RPC Connector', () => {
     expect(interactionInfo.state.subject).toBe(agent.idw.did)
     expect(interactionInfo.state.credentials).toHaveLength(1)
     expect(interactionInfo.state.credentials).toStrictEqual([issuedCred.toJSON()])
+  })
+
+  it('correctly assembles and signs authentication request tokens', async () => {
+    const args = initiateAuthnRPCMessage
+
+    const res = await client.sendRequest(
+      RPCMethods.initiateAuthentication,
+      args
+    )
+
+    const {interactionId} = res
+    const interaction = await agent.findInteraction(interactionId)
+
+    const resp = await interaction.createAuthenticationResponse()
+
+    const { interactionInfo } = await client.sendRequest(RPCMethods.processInteractionToken, {
+      interactionToken: resp.encode()
+    })
+
+    expect(interactionId).toStrictEqual(interaction.id)
+    expect(interactionInfo.type).toBe('authentication')
+    expect(interactionInfo).toBeDefined()
+    expect(interactionInfo.completed).toBeTruthy()
   })
 
   describe('errors', () => {
