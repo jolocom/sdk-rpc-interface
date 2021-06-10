@@ -143,8 +143,3 @@ export const utils = {
 }
 
 const client = new JolocomRPCClient('ws://localhost:4040')
-
-client.sendRequest(RPCMethods.initiateAuthentication, {
-  description: 'hello',
-  callbackURL: 'google.com'
-}).then(console.log)
