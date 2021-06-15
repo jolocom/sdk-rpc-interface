@@ -1057,10 +1057,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
-"@jolocom/protocol-ts@^0.5.4":
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.5.4.tgz#a59052d97b45ad157e877b1ed8ed2cd8235ad45e"
-  integrity sha512-t6gzeLZPgKQUksjAVgMint/htYIEy6LwVfqhm7kZx4+bkAxa0LHIynqEXFPA7bbx1+mrd2hxsvWmSswXiBtlkw==
+"@jolocom/protocol-ts@^0.5.5":
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/@jolocom/protocol-ts/-/protocol-ts-0.5.5.tgz#cbf49e344f201a416d30bd5df8ed5d9cd2ea4d2f"
+  integrity sha512-fQZHI0bN/letV14k1PslCX6arUuUjwXBZnxNopSpMkLja2bRABC/wZc2bro8+HOD8L1Ng8FOExcszVIOt/4qfw==
   dependencies:
     cred-types-jolocom-core "^0.0.11"
 

@@ -8,7 +8,7 @@ import {
 } from '@jolocom/sdk/js/interactionManager/types';
 import { ISignedCredentialAttrs } from 'jolocom-lib/js/credentials/signedCredential/types';
 import { issueFromStateAndClaimData } from './utils';
-import { InitiateAuthnRequestOptions, InitiateCredentialRequestOptions, InitiateOfferOptions, RPCMethods } from './types';
+import { InitiateAuthnRequestOptions, InitiateAuthzRequestOptions, InitiateCredentialRequestOptions, InitiateOfferOptions, RPCMethods } from './types';
 import { serverConfig } from './config'
 
 /**
@@ -36,9 +36,9 @@ const getRequestHandlers = (
     console.log('address fueled')
 
     return agent.didMethod.registrar.updatePublicProfile(
-        agent.keyProvider, 
-        await agent.passwordStore.getPassword(), 
-        agent.idw.identity, 
+        agent.keyProvider,
+        await agent.passwordStore.getPassword(),
+        agent.idw.identity,
         newPublicProfile
       ).then(() => {
         console.log('profile updated')
@@ -86,6 +86,19 @@ const getRequestHandlers = (
     }
 
     const token = await agent.authRequestToken(args);
+    const { id } = await agent.findInteraction(token);
+
+    return {
+      interactionId: id,
+      interactionToken: token.encode(),
+    }
+  },
+  initiateAuthorization: async (args: InitiateAuthzRequestOptions) => {
+    if (!args.callbackURL || !args.description) {
+      throw new Error('Invalid params')
+    }
+
+    const token = await agent.authorizationRequestToken(args);
     const { id } = await agent.findInteraction(token);
 
     return {

@@ -3,6 +3,7 @@ import WebSocket from 'ws';
 import * as rpc from 'jsonrpc-lite';
 import {
   InitiateAuthnRequestOptions,
+  InitiateAuthzRequestOptions,
   InitiateCredentialRequestOptions,
   InitiateOfferOptions,
   ProcessJWTOptions,
@@ -81,6 +82,7 @@ export class JolocomRPCClient {
     args:
       | InitiateOfferOptions
       | InitiateAuthnRequestOptions
+      | InitiateAuthzRequestOptions
       | InitiateCredentialRequestOptions
       | ProcessJWTOptions
       | UpdatePubProfileRequestOptions
