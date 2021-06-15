@@ -2,7 +2,8 @@ import {
   claimsMetadata,
   ICredentialRequestAttrs,
   CredentialOfferRequestAttrs,
-  IAuthenticationAttrs
+  IAuthenticationAttrs,
+  IAuthorizationAttrs
 } from '@jolocom/protocol-ts';
 import { Defined } from 'jsonrpc-lite';
 
@@ -11,6 +12,7 @@ export enum RPCMethods {
   initiateCredentialOffer = 'initiateCredentialOffer',
   initiateCredentialRequest = 'initiateCredentialRequest',
   initiateAuthentication = 'initiateAuthentication',
+  initiateAuthorization = 'initiateAuthorization',
   processInteractionToken = 'processInteractionToken',
 }
 
@@ -25,6 +27,7 @@ export interface InitiateOfferOptions extends CredentialOfferRequestAttrs {
 export type InitiateCredentialRequestOptions = ICredentialRequestAttrs;
 
 export type InitiateAuthnRequestOptions = IAuthenticationAttrs
+export type InitiateAuthzRequestOptions = IAuthorizationAttrs
 
 export type ProcessJWTOptions = {
   interactionToken: string;

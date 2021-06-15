@@ -45,7 +45,7 @@
     }
   ],
   "devDependencies": {
-    "@jolocom/protocol-ts": "^0.5.4",
+    "@jolocom/protocol-ts": "^0.5.5",
     "@size-limit/preset-small-lib": "^4.10.1",
     "@types/qrcode": "^1.4.0",
     "@types/ws": "^7.4.0",
